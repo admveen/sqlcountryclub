@@ -113,9 +113,38 @@ the guest user's ID is always 0. Include in your output the name of the
 facility, the name of the member formatted as a single column, and the cost.
 Order by descending cost, and do not use any subqueries. */
 
-SELECT FROM * 
+SELECT Facilities.name,
+CONCAT( firstname, ' ', surname ) AS fullname,
+CASE WHEN Bookings.memid = 0 THEN Facilities.guestcost
+ELSE Facilities.membercost END AS cost
+FROM Bookings
+INNER JOIN Facilities
+ON Bookings.facid = Facilities.facid
+INNER JOIN Members
+ON Bookings.memid = Members.memid
+WHERE DATE(starttime) = '2012-09-14' AND 
+CASE WHEN Bookings.memid = 0 THEN Facilities.guestcost
+ELSE Facilities.membercost END > 30
+ORDER BY CASE WHEN Bookings.memid = 0 THEN Facilities.guestcost
+ELSE Facilities.membercost END DESC ;
+
 
 /* Q9: This time, produce the same result as in Q8, but using a subquery. */
+
+SELECT subq.facilityname, subq.fullname, subq.cost
+FROM 
+(SELECT Facilities.name as facilityname,
+CONCAT( firstname, ' ', surname ) AS fullname,
+CASE WHEN Bookings.memid = 0 THEN Facilities.guestcost
+ELSE Facilities.membercost END AS cost
+FROM Bookings
+INNER JOIN Facilities
+ON Bookings.facid = Facilities.facid
+INNER JOIN Members
+ON Bookings.memid = Members.memid
+WHERE DATE(starttime) = '2012-09-14') AS subq
+WHERE subq.cost > 30
+ORDER BY subq.cost DESC;
 
 
 /* PART 2: SQLite
